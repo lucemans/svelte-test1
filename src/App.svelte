@@ -61,7 +61,7 @@
       {#each Object.keys(availableUpgrades) as upgrade}
         <Upgrade
           upgradeLabel={availableUpgrades[upgrade].label}
-          upgradeCost={availableUpgrades[upgrade].price}
+          upgradeCost={Math.round(availableUpgrades[upgrade].price ** (1+0.5*(upgrades[upgrade] || 0)))}
           upgradeCps={availableUpgrades[upgrade].cps}
           {cookieCount}
           {buyUpgrade}
