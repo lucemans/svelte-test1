@@ -1,15 +1,17 @@
 <script lang="ts">
   export let upgradeCost = 0;
   export let upgradeCps = 0;
-  export let buyUpgrade: (price: number, cps: number) => () => void =
-    (price, cps) => () => {};
+  export let buyUpgrade: (id: string) => () => void =
+    () => () => {};
   export let cookieCount;
   export let upgradeLabel = "";
+  export let upgradeId = '';
+  export let upgradeCount = 0;
 </script>
 
 <div class="upgrade">
-  {upgradeLabel} ({upgradeCps}cps) <button
-    on:click={buyUpgrade(upgradeCost, upgradeCps)}
+  {upgradeCount}x {upgradeLabel} ({upgradeCps}cps) <button
+    on:click={buyUpgrade(upgradeId)}
     disabled={cookieCount < upgradeCost}>{upgradeCost}</button
   >
 </div>

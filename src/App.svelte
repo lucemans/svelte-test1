@@ -1,24 +1,38 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import Upgrade from './Upgrade.svelte';
+  import Upgrade from "./Upgrade.svelte";
+
+  const availableUpgrades: {
+    [key: string]: { price: number; cps: number; label: string };
+  } = {
+    farmer: { price: 5, cps: 1, label: "Farmer" },
+    machine: { price: 20, cps: 5, label: "Machine" },
+    factory: { price: 50, cps: 10, label: "Factory" },
+  };
 
   export let cookieCount = 0;
-  export let upgrades = 0;
+  export let upgrades: { [key: keyof typeof availableUpgrades]: number } = {};
 
   const clickCookie = () => {
     cookieCount += 1;
   };
 
-  const buyUpgrade = (price: number, amount: number) => () => {
-    if (cookieCount >= price) {
-      cookieCount -= price;
-      upgrades += amount;
+  const buyUpgrade = (id: string) => () => {
+    if (cookieCount >= availableUpgrades[id].price) {
+      cookieCount -= availableUpgrades[id].price;
+      if (!!!upgrades[id]) {
+        upgrades[id] = 0;
+      }
+      upgrades[id] += 1;
     }
   };
 
   onMount(() => {
     const interval = setInterval(() => {
-      cookieCount += upgrades;
+      cookieCount += Object.keys(upgrades).reduce(
+        (a, b) => a + upgrades[b] * availableUpgrades[b].cps,
+        0
+      );
     }, 1000);
 
     return () => {
@@ -35,13 +49,26 @@
       on:click={clickCookie}
     />
     <h1>You have {cookieCount} cookies!</h1>
-    {#if upgrades > 0}
-    <h2>Auto-farming {upgrades} per second</h2>
+    {#if Object.keys(upgrades).length > 0}
+      <h2>
+        Auto-farming {Object.keys(upgrades).reduce(
+          (a, b) => a + upgrades[b] * availableUpgrades[b].cps,
+          0
+        )} per second
+      </h2>
     {/if}
     <div class="upgrades">
-      <Upgrade upgradeLabel="Farmer" upgradeCost={10} upgradeCps={1} cookieCount={cookieCount} buyUpgrade={buyUpgrade}/>
-      <Upgrade upgradeLabel="Machinery" upgradeCost={20} upgradeCps={5} cookieCount={cookieCount} buyUpgrade={buyUpgrade}/>
-      <Upgrade upgradeLabel="Bakery" upgradeCost={50} upgradeCps={10} cookieCount={cookieCount} buyUpgrade={buyUpgrade}/>
+      {#each Object.keys(availableUpgrades) as upgrade}
+        <Upgrade
+          upgradeLabel={availableUpgrades[upgrade].label}
+          upgradeCost={availableUpgrades[upgrade].price}
+          upgradeCps={availableUpgrades[upgrade].cps}
+          {cookieCount}
+          {buyUpgrade}
+          upgradeId={upgrade}
+          upgradeCount={upgrades[upgrade] || 0}
+        />
+      {/each}
     </div>
   </main>
   <a class="copyright" href="https://github.com/lucemans" target="_blank"
